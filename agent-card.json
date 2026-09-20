@@ -37,49 +37,103 @@
       "id": "api_integration",
       "name": "API Integration",
       "description": "Connect Stripe, GitHub, AgentMail, Airtable, CRMs and payment APIs into one unified system. POST a JSON task to https://saralorettanelson.com/api/intake to request a fixed-price proposal.",
-      "tags": ["api integration", "stripe", "github", "agentmail", "airtable", "crm", "webhooks", "payment apis"],
+      "tags": [
+        "api integration",
+        "stripe",
+        "github",
+        "agentmail",
+        "airtable",
+        "crm",
+        "webhooks",
+        "payment apis"
+      ],
       "examples": [
         "Connect our Stripe account to our CRM so new payments create customer records automatically.",
         "Build a webhook bridge that mirrors GitHub issues into our project tracker."
       ],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json", "text/plain"]
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json",
+        "text/plain"
+      ]
     },
     {
       "id": "intelligent_automation",
       "name": "Intelligent Automation",
       "description": "Workflow orchestration, CI/CD pipelines, cron scheduling, self-healing monitoring with automatic recovery.",
-      "tags": ["automation", "workflow", "ci/cd", "cron", "scheduling", "self-healing", "monitoring", "orchestration"],
+      "tags": [
+        "automation",
+        "workflow",
+        "ci/cd",
+        "cron",
+        "scheduling",
+        "self-healing",
+        "monitoring",
+        "orchestration"
+      ],
       "examples": [
         "Set up a self-healing monitor that restarts our service and alerts us when it fails.",
         "Automate our release pipeline with tests and a staged deploy."
       ],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json", "text/plain"]
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json",
+        "text/plain"
+      ]
     },
     {
       "id": "ai_intelligence",
       "name": "AI & Intelligence (RAG)",
       "description": "Retrieval-augmented generation pipelines, semantic search, AI research, competitor intelligence.",
-      "tags": ["rag", "retrieval augmented generation", "semantic search", "ai research", "competitor intelligence", "embeddings"],
+      "tags": [
+        "rag",
+        "retrieval augmented generation",
+        "semantic search",
+        "ai research",
+        "competitor intelligence",
+        "embeddings"
+      ],
       "examples": [
         "Build a RAG pipeline over our documentation so an agent can answer support questions.",
         "Set up a competitor-intelligence agent that summarizes weekly market moves."
       ],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json", "text/plain"]
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json",
+        "text/plain"
+      ]
     },
     {
       "id": "data_infrastructure",
       "name": "Data & Infrastructure",
       "description": "PostgreSQL, Pinecone vector databases, Redis, Cloudflare, secure backups with SHA-256 integrity verification and retention.",
-      "tags": ["postgresql", "pinecone", "redis", "cloudflare", "backup", "infrastructure", "vector database", "sha-256"],
+      "tags": [
+        "postgresql",
+        "pinecone",
+        "redis",
+        "cloudflare",
+        "backup",
+        "infrastructure",
+        "vector database",
+        "sha-256"
+      ],
       "examples": [
         "Design a backup strategy with SHA-256 integrity checks and a retention policy.",
         "Stand up a Pinecone index and wire it to our application."
       ],
-      "inputModes": ["application/json"],
-      "outputModes": ["application/json", "text/plain"]
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json",
+        "text/plain"
+      ]
     }
   ],
   "payment": {
@@ -113,9 +167,23 @@
         "amount_display": "human-readable amount + asset",
         "reference": "payment reference id",
         "expires_at": "unix expiry timestamp",
-        "verify_url": "poll this to confirm payment status"
+        "verify_url": "public tokenless status URL (our domain, keyed by reference) \u2014 GET it to confirm payment status"
       },
-      "notes": "On-chain settlement (mainnet). GET the endpoint first to read {enabled, assets}. Agents and humans use the same endpoint. A real customer name and email are required; synthetic/placeholder values are rejected. Payment status is confirmed via verify_url."
+      "notes": "On-chain settlement (mainnet). GET the endpoint first to read {enabled, assets}. Agents and humans use the same endpoint. A real customer name and email are required; synthetic/placeholder values are rejected. Payment status is confirmed by GETting verify_url (public, no token) and checking `paid`.",
+      "verify": {
+        "method": "GET",
+        "urlTemplate": "https://saralorettanelson.com/api/crypto_checkout?reference={reference}",
+        "auth": "none (public, tokenless)",
+        "responseFields": {
+          "state": "payment state \u2014 e.g. created | awaiting_payment | paid | expired",
+          "paid": "boolean \u2014 true once settlement is confirmed",
+          "amount_base": "integer base units",
+          "amount_display": "human-readable amount + asset (always present)",
+          "pay_to": "on-chain deposit address",
+          "expires_at": "unix expiry timestamp"
+        },
+        "notes": "Poll until paid==true (or state==paid). No authentication required. Only the payment reference is needed."
+      }
     }
   },
   "metadata": {
